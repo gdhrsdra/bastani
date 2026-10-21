@@ -1,6 +1,6 @@
 /* Bump VERSION whenever you change any cached file other than index.html */
 var VERSION='bastani-v1',FONTS='bastani-fonts';
-var CORE=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png','icons/favicon.svg'];
+var CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png','favicon.svg'];
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(VERSION).then(function(c){return c.addAll(CORE);}).then(function(){return self.skipWaiting();}));
 });
