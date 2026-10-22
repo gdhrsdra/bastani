@@ -176,6 +176,9 @@ kbd{font-family:var(--font-body);font-size:11.5px;font-weight:700;background:var
 .t-final span{font-weight:800}
 .t-final b{font-family:var(--font-display);font-weight:400;font-size:34px;line-height:1.1;color:var(--accent)}
 .t-final small{font-size:13px;color:var(--muted)}
+.t-rial{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:6px;padding:6px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px;font-weight:700;color:var(--muted)}
+.t-rial b{font-size:18px;color:var(--ink)}
+.m-rial{margin-top:-8px;font-weight:800;font-size:17px}
 .btn{min-height:44px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font-weight:700;padding-inline:16px}
 .btn:hover:not(:disabled){border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:800;font-size:18px;min-height:52px}
@@ -330,6 +333,7 @@ kbd{font-family:var(--font-body);font-size:11.5px;font-weight:700;background:var
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
     <h2 id="m-title">سفارش ثبت شد</h2>
     <div class="m-sum"><span id="m-no"></span><b id="m-total" class="num"></b></div>
+    <p class="m-rial num" id="m-rial"></p>
     <div class="actions">
       <button class="btn primary" data-act="mPrint">چاپ رسید</button>
       <button class="btn" data-act="mCopy">کپی رسید</button>
@@ -356,6 +360,7 @@ MENU.forEach(function(c){c.items.forEach(function(x,i){var k=c.id+'-'+i;ITEMS[k]
 var nf=new Intl.NumberFormat('fa-IR');
 function fmt(n){return nf.format(n);}
 function toman(n){return fmt(Math.round(n))+' تومان';}
+function rial(n){return fmt(Math.round(n)*10)+' ریال';}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function num(s){
   var t=String(s||'').replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d);}).replace(/[٬,،\s]/g,'').replace('٫','.');
@@ -472,6 +477,7 @@ function renderOrder(){
   var t='<div class="t-row"><span>جمع اقلام</span><span class="num">'+toman(c.sub)+'</span></div>';
   if(c.disc>0)t+='<div class="t-row"><span>تخفیف</span><span class="num">− '+toman(c.disc)+'</span></div>';
   t+='<div class="t-final"><span>قابل پرداخت</span><span><b class="num">'+fmt(Math.round(c.total))+'</b> <small>تومان</small></span></div>';
+  if(c.count)t+='<div class="t-rial"><span>مبلغ به ریال (کارتخوان)</span><b class="num">'+rial(c.total)+'</b></div>';
   $('#totals').innerHTML=t;
   $('#finish').disabled=!c.count;
 }
@@ -505,7 +511,7 @@ function receiptText(o){
   out.push('');
   out.push('جمع اقلام: '+toman(o.sub));
   if(o.disc>0)out.push('تخفیف: '+toman(o.disc));
-  out.push('قابل پرداخت: '+toman(o.total));
+  out.push('قابل پرداخت: '+toman(o.total));out.push('معادل: '+rial(o.total));
   out.push('پرداخت: '+(o.pay==='card'?'کارت':'نقد'));
   if(o.note)out.push('توضیح: '+o.note);
   out.push('','ممنون از انتخاب شما');
@@ -536,7 +542,7 @@ function receiptHTML(o){
   '<thead><tr><th style="text-align:start">کالا</th><th>تعداد</th><th class="n">فی</th><th class="n">مبلغ<br><small>(تومان)</small></th></tr></thead>'+
   '<tbody>'+rows+'</tbody><tfoot>'+
   row('جمع اقلام',fmt(o.sub),'tot sp')+(o.disc>0?row('تخفیف','− '+fmt(o.disc),'tot'):'')+
-  row('قابل پرداخت (تومان)',fmt(o.total),'tot fin')+row('نوع پرداخت',o.pay==='card'?'کارت':'نقد','tot')+
+  row('قابل پرداخت (تومان)',fmt(o.total),'tot fin')+row('معادل (ریال)',fmt(Math.round(o.total*10)),'tot')+row('نوع پرداخت',o.pay==='card'?'کارت':'نقد','tot')+
   '</tfoot></table><p class="ft">ممنون از انتخاب شما<small>'+ADDRESS+'</small></p></body></html>';
 }
 var prBusy=false;
@@ -566,7 +572,7 @@ function openModal(o,isNew){
   modalOrder=o;
   $('#m-title').textContent=isNew?'سفارش ثبت شد':'رسید سفارش';
   $('#m-no').textContent=o.no?'سفارش شماره '+fmt(o.no):'';
-  $('#m-total').textContent=toman(o.total);
+  $('#m-total').textContent=toman(o.total);$('#m-rial').textContent=rial(o.total);
   $('#modal').hidden=false;
   var b=document.querySelector('[data-act="mPrint"]');if(b)b.focus();
 }
